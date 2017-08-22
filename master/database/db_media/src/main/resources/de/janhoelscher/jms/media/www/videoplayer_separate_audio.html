@@ -1,0 +1,26 @@
+<html>
+	<head>
+	</head>
+	<body>
+		<video id="video" controls style="width: 100%; height: 100%;">
+			<source src="%videosource%" type="%videotype%"></source>
+		</video>
+		<audio id="audio">
+			<source src="%audiosource%" type="%audiotype%"></source>
+		</audio>
+		<script type="text/javascript">
+			var video = document.getElementById("video");
+			var audio = document.getElementById("audio");
+			video.onplay = function() {
+				audio.currentTime = video.currentTime;
+				audio.play();
+			}
+			video.onseeked = function() {
+				setTimeout(function(){
+					audio.currentTime = video.currentTime;
+				}, 1000);
+			}
+			video.onpause = function() { audio.pause(); }
+		</script>
+	</body>
+</html>
