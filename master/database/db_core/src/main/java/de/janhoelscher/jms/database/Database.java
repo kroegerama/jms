@@ -4,9 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
+import java.util.concurrent.Semaphore;
 
 public class Database {
+
+	private final Semaphore								lock				= new Semaphore(1, true);
 
 	private final Connection							connection;
 
@@ -20,6 +24,14 @@ public class Database {
 		return connection;
 	}
 
+	public void lock() {
+		lock.acquireUninterruptibly();
+	}
+
+	public void unlock() {
+		lock.release();
+	}
+
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		PreparedStatement result = preparedStatements.get(sql);
 		if (result == null) {
@@ -30,14 +42,22 @@ public class Database {
 	}
 
 	public boolean execute(String sql) throws SQLException {
-		return prepareStatement(sql).execute();
+		return connection.createStatement().execute(sql);
 	}
 
 	public int executeUpdate(String sql) throws SQLException {
-		return prepareStatement(sql).executeUpdate();
+		return connection.createStatement().executeUpdate(sql);
 	}
 
 	public ResultSet executeQuery(String sql) throws SQLException {
-		return prepareStatement(sql).executeQuery();
+		return connection.createStatement().executeQuery(sql);
+	}
+
+	public void executeMultiple(String sql) throws SQLException {
+		String[] commands = sql.split("\\;");
+		Statement stmt = connection.createStatement();
+		for (String command : commands) {
+			stmt.execute(command);
+		}
 	}
 }

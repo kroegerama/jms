@@ -2,22 +2,31 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>de.janhoelscher.jms.database</groupId>
-		<artifactId>database</artifactId>
+		<groupId>de.janhoelscher.jms</groupId>
+		<artifactId>master</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>db_core</artifactId>
-	<packaging>jar</packaging>
-	<name>db_core</name>
+	<artifactId>setup</artifactId>
+	<name>setup</name>
 	<dependencies>
 		<dependency>
-			<groupId>org.xerial</groupId>
-			<artifactId>sqlite-jdbc</artifactId>
-			<version>3.20.0</version>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>de.janhoelscher.jms.database</groupId>
+			<artifactId>db_core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>de.janhoelscher.jms</groupId>
 			<artifactId>config</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>de.janhoelscher.jms.database</groupId>
+			<artifactId>db_media</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>

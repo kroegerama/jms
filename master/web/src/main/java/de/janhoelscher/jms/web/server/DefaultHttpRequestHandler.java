@@ -9,13 +9,12 @@ import org.apache.commons.io.FilenameUtils;
 
 import de.janhoelscher.jms.web.http.HttpConstants;
 import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.NanoHTTPD.IHTTPSession;
 import fi.iki.elonen.NanoHTTPD.Response;
 
 class DefaultHttpRequestHandler implements HttpRequestHandler {
 
 	@Override
-	public Response handleGetRequest(IHTTPSession session) {
+	public Response handleGetRequest(Request session) {
 		String requestedFilePath = WebServer.DOCUMENT_ROOT + session.getUri();
 		File file = new File(requestedFilePath);
 		if (file.isDirectory()) {
@@ -37,19 +36,19 @@ class DefaultHttpRequestHandler implements HttpRequestHandler {
 	}
 
 	@Override
-	public Response handlePostRequest(IHTTPSession session) {
+	public Response handlePostRequest(Request session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Response handleHeadRequest(IHTTPSession session) {
+	public Response handleHeadRequest(Request session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Response handleTraceRequest(IHTTPSession session) {
+	public Response handleTraceRequest(Request session) {
 		// TODO Auto-generated method stub
 		return null;
 

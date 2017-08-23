@@ -61,8 +61,11 @@ public class VideoFile implements MediaFile {
 		return extractedAudioFile;
 	}
 
-	public void setExtractedAudioFile(String absolutePath) {
-
+	public void setExtractedAudioFile(String extractedAudioPath) {
+		if (this.extractedAudioFile == null || !this.extractedAudioFile.equals(extractedAudioPath)) {
+			this.extractedAudioFile = extractedAudioPath;
+			MediaDatabase.updateExtractedAudioFile(this);
+		}
 	}
 
 	@Override

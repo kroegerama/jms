@@ -1,32 +1,31 @@
 package de.janhoelscher.jms.web.server;
 
 import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.NanoHTTPD.IHTTPSession;
 import fi.iki.elonen.NanoHTTPD.Response;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 
 public interface HttpRequestHandler {
 
-	public default Response handleHttpRequest(IHTTPSession session) throws Exception {
-		switch (session.getMethod()) {
+	public default Response handleHttpRequest(Request request) throws Exception {
+		switch (request.getMethod()) {
 			case GET:
-				return handleGetRequest(session);
+				return handleGetRequest(request);
 			case POST:
-				return handlePostRequest(session);
+				return handlePostRequest(request);
 			case HEAD:
-				return handleHeadRequest(session);
+				return handleHeadRequest(request);
 			case TRACE:
-				return handleTraceRequest(session);
+				return handleTraceRequest(request);
 			default:
 				return NanoHTTPD.newFixedLengthResponse(Status.NOT_IMPLEMENTED, NanoHTTPD.MIME_PLAINTEXT, "501 - Not implemented");
 		}
 	}
 
-	Response handleGetRequest(IHTTPSession session);
+	Response handleGetRequest(Request request);
 
-	Response handlePostRequest(IHTTPSession session);
+	Response handlePostRequest(Request request);
 
-	Response handleHeadRequest(IHTTPSession session);
+	Response handleHeadRequest(Request request);
 
-	Response handleTraceRequest(IHTTPSession session);
+	Response handleTraceRequest(Request request);
 }

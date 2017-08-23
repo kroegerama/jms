@@ -16,8 +16,7 @@ public class DefaultDatabaseConnectionProvider implements DatabaseConnectionProv
 				Class.forName("org.sqlite.JDBC");
 				DefaultDatabaseConnectionProvider.driverLoaded = true;
 			} catch (ClassNotFoundException e) {
-				LogFactory.getLog(DefaultDatabaseConnectionProvider.class).error(	"Failed to load SQLite JDBC driver!",
-																					e);
+				LogFactory.getLog(DefaultDatabaseConnectionProvider.class).error("Failed to load SQLite JDBC driver!", e);
 			}
 		}
 		return DefaultDatabaseConnectionProvider.driverLoaded;
@@ -26,7 +25,7 @@ public class DefaultDatabaseConnectionProvider implements DatabaseConnectionProv
 	@Override
 	public Connection openConnection(String dbName, String username, String password) throws SQLException {
 		if (loadDriver()) {
-			return DriverManager.getConnection("jdbc:sqlite:db/" + dbName + ".db");
+			return DriverManager.getConnection("jdbc:sqlite:" + dbName + ".db");
 		}
 		return null;
 	}

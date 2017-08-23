@@ -7,11 +7,12 @@ import java.util.ServiceLoader;
 
 import org.apache.commons.logging.LogFactory;
 
+import de.janhoelscher.jms.config.Config;
+
 public class DatabaseFactory {
 
-	private static final String					DB_NAME	= "jms";
-
 	private static DatabaseConnectionProvider	connectionProvider;
+
 	private static Database						database;
 
 	private static DatabaseConnectionProvider getConnectionProvider() {
@@ -28,8 +29,7 @@ public class DatabaseFactory {
 
 	public static Database getDatabase() {
 		if (DatabaseFactory.database == null) {
-			DatabaseFactory.database = new Database(DatabaseFactory.openConnection(	DatabaseFactory.DB_NAME, null,
-																					null));
+			DatabaseFactory.database = new Database(DatabaseFactory.openConnection(Config.getInstance().Database.Name, null, null));
 		}
 		return DatabaseFactory.database;
 	}
@@ -38,8 +38,7 @@ public class DatabaseFactory {
 		try {
 			return DatabaseFactory.getConnectionProvider().openConnection(dbName, username, password);
 		} catch (SQLException e) {
-			LogFactory.getLog(DatabaseFactory.class).error("Failed to open connection to database \""	+ dbName + "\".",
-															e);
+			LogFactory.getLog(DatabaseFactory.class).error("Failed to open connection to database \"" + dbName + "\".", e);
 		}
 		return null;
 	}

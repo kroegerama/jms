@@ -19,6 +19,10 @@ public class Config {
 		ConfigLoader.saveConfig(getInstance());
 	}
 
+	public static String getAbsolutePath() {
+		return ConfigLoader.getAbsoluteConfigPath();
+	}
+
 	@XmlElement(required = true)
 	public MediaLibrary	MediaLibrary	= new MediaLibrary();
 

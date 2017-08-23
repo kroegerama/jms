@@ -1,4 +1,4 @@
-package de.janhoelscher.jms.database.media.provider;
+package de.janhoelscher.jms.database.media.web;
 
 import java.io.File;
 import java.io.FileInputStream;

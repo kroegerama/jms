@@ -1,0 +1,8 @@
+/* WORK IN PROGRESS */
+
+CREATE TABLE IF NOT EXISTS users (
+	column1 DATE_TYPE1 PRIMARY KEY,
+	column2 DATE_TYPE2,
+	column3 DATE_TYPE3,
+	column4 DATE_TYPE4
+);

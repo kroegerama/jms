@@ -38,4 +38,8 @@ abstract class ConfigLoader {
 			LogFactory.getLog(ConfigLoader.class).warn("Failed to save config!", e);
 		}
 	}
+
+	public static String getAbsoluteConfigPath() {
+		return new File(CONFIG_NAME).getAbsolutePath();
+	}
 }

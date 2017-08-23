@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.apache.commons.logging.LogFactory;
+
 import de.janhoelscher.jms.web.http.HttpConstants;
 import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoHTTPD.Response.Status;
 
 public class WebServer extends NanoHTTPD {
 
@@ -41,10 +44,16 @@ public class WebServer extends NanoHTTPD {
 	@Override
 	public Response serve(IHTTPSession session) {
 		try {
-			return getRequestHandler(session.getUri()).handleHttpRequest(session);
+			HttpRequestHandler handler = getRequestHandler(session.getUri());
+			Request request = Request.init(session);
+			Response response = handler.handleHttpRequest(request);
+			if (response != null) {
+				return response;
+			}
 		} catch (Exception e) {
-			return NanoHTTPD.newFixedLengthResponse("ERROR");
+			LogFactory.getLog(WebServer.class).warn("Failed to handle request for session " + session);
 		}
+		return NanoHTTPD.newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "500 - Internal Server Error"); // TODO build a better 500 site.
 	}
 
 	private HttpRequestHandler getRequestHandler(String path) {
@@ -89,8 +98,14 @@ public class WebServer extends NanoHTTPD {
 		if (path == null) {
 			throw new NullPointerException("Path cannot be null.");
 		}
+		if (path.equals("/")) {
+			return path;
+		}
 		if (!path.startsWith(HttpConstants.SLASH + "")) {
 			path = HttpConstants.SLASH + path;
+		}
+		if (path.endsWith("/")) {
+			path = path.substring(0, path.length() - 1);
 		}
 		return path;
 	}

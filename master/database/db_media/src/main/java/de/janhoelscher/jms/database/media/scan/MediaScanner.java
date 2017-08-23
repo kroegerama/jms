@@ -1,10 +1,22 @@
 package de.janhoelscher.jms.database.media.scan;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.ServiceLoader;
 
+import javax.imageio.ImageIO;
+
+import org.apache.commons.logging.LogFactory;
+
+import de.janhoelscher.jms.database.media.ImageFile;
 import de.janhoelscher.jms.database.media.Library;
+import de.janhoelscher.jms.database.media.MediaDatabase;
+import de.janhoelscher.jms.database.media.MediaFile;
+import de.janhoelscher.jms.database.media.scan.ffmpeg.AudioInfoExtractor;
+import de.janhoelscher.jms.database.media.scan.ffmpeg.VideoInfoExtractor;
 
 public class MediaScanner {
 
@@ -37,13 +49,50 @@ public class MediaScanner {
 			if (f.isDirectory()) {
 				scanDir(f);
 			} else {
-				scanFile(f);
+				scanSingleFile(f);
 			}
 		}
 	}
 
-	private void scanFile(File file) {
+	private void scanSingleFile(File file) {
+		MediaFile mFile = null;
+		try {
+			switch (library.getType()) {
+				case SERIES:
+				case MOVIES:
+					mFile = VideoInfoExtractor.getVideoFileInformation(file);
+					break;
+				case MUSIC:
+					mFile = AudioInfoExtractor.getAudioFileInformation(file);
+				case PICTURES:
+					mFile = getImageInformation(file);
+				default:
+					break;
+			}
+		} catch (IOException e) {
+			LogFactory.getLog(MediaScanner.class).warn("Failed to scan file \"" + file.getAbsolutePath() + "\"", e);
+			return;
+		}
 
-		ServiceLoader.load(MediaInformationFinder.class).iterator();
+		if (mFile != null) {
+			Iterator<MediaInformationFinder> mInfoFinders = ServiceLoader.load(MediaInformationFinder.class).iterator();
+			boolean found = false;
+			while (mInfoFinders.hasNext() && !found) {
+				found = mInfoFinders.next().findMediaInformation(library.getType(), mFile);
+			}
+			if (!found) {
+
+			}
+		}
+	}
+
+	private ImageFile getImageInformation(File imageFile) {
+		try {
+			BufferedImage image = ImageIO.read(imageFile);
+			return new ImageFile(-1, imageFile.getAbsolutePath(), imageFile.length(), image.getWidth(), image.getHeight());
+		} catch (IOException e) {
+			LogFactory.getLog(MediaDatabase.class).warn("Failed to load ImageFile \"" + imageFile + "\"", e);
+			return null;
+		}
 	}
 }

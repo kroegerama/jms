@@ -1,18 +1,18 @@
-package de.janhoelscher.jms.database.media.provider;
+package de.janhoelscher.jms.database.media.web;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
 import de.janhoelscher.jms.web.http.HttpConstants;
+import de.janhoelscher.jms.web.server.Request;
 import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.NanoHTTPD.IHTTPSession;
 import fi.iki.elonen.NanoHTTPD.Response;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 
 class MediaFileServer {
 
-	public static Response serveMediaFile(IHTTPSession session, String mimeType, long fileLength, InputStream input) {
+	public static Response serveMediaFile(Request session, String mimeType, long fileLength, InputStream input) {
 		try {
 			String rangeStr = session.getHeaders().get("range");
 			long[] range = MediaFileServer.getRange(rangeStr);

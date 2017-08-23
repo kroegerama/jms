@@ -1,4 +1,4 @@
-package de.janhoelscher.jms.database.media.provider;
+package de.janhoelscher.jms.database.media.web;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,18 +10,18 @@ import org.apache.commons.logging.LogFactory;
 
 import de.janhoelscher.jms.database.media.MediaDatabase;
 import de.janhoelscher.jms.database.media.VideoFile;
-import de.janhoelscher.jms.database.media.scan.ffmpeg.FFmpeg;
+import de.janhoelscher.jms.database.media.scan.ffmpeg.AudioStreamExtractor;
 import de.janhoelscher.jms.tasks.Task;
 import de.janhoelscher.jms.web.http.HttpRequestUri;
 import de.janhoelscher.jms.web.server.HttpRequestHandler;
+import de.janhoelscher.jms.web.server.Request;
 import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.NanoHTTPD.IHTTPSession;
 import fi.iki.elonen.NanoHTTPD.Response;
 
 public class MediaHttpRequestHander implements HttpRequestHandler {
 
 	@Override
-	public Response handleGetRequest(IHTTPSession session) {
+	public Response handleGetRequest(Request session) {
 		try {
 			HttpRequestUri requestUri = HttpRequestUri.fromString(session.getUri());
 			if (requestUri.getLastPart(1).equals("getvideo")) {
@@ -49,19 +49,19 @@ public class MediaHttpRequestHander implements HttpRequestHandler {
 	}
 
 	@Override
-	public Response handlePostRequest(IHTTPSession session) {
+	public Response handlePostRequest(Request session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Response handleHeadRequest(IHTTPSession session) {
+	public Response handleHeadRequest(Request session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Response handleTraceRequest(IHTTPSession session) {
+	public Response handleTraceRequest(Request session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -86,15 +86,15 @@ public class MediaHttpRequestHander implements HttpRequestHandler {
 		return NanoHTTPD.newFixedLengthResponse(videoPlayer);
 	}
 
-	private Response createRawVideoResponse(VideoFile file, IHTTPSession session) throws IOException {
+	private Response createRawVideoResponse(VideoFile file, Request session) throws IOException {
 		File rawFile = new File(file.getFile());
 		return MediaFileServer.serveMediaFile(session, "video/webm", rawFile.length(), new FileInputStream(rawFile));
 	}
 
-	private Response createExtractedAudioResponse(VideoFile file, IHTTPSession session) throws IOException {
+	private Response createExtractedAudioResponse(VideoFile file, Request session) throws IOException {
 		String audio = file.getExtractedAudioFile();
 		if (audio == null) {
-			Task<File> task = FFmpeg.extractAudio(file.getFile());
+			Task<File> task = AudioStreamExtractor.extractAudio(file.getFile());
 			for (int tries = 1; tries < 4 && !task.getTaskInformation().getAdditionalInformation().exists(); tries++) {
 				LogFactory.getLog(MediaHttpRequestHander.class).info("Failed to get audio-file. Retrying in 1 second. (" + (3 - tries) + " tries left.");
 				try {

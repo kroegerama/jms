@@ -11,66 +11,91 @@ import de.janhoelscher.jms.database.media.Library.LibraryType;
 
 public abstract class MediaDatabase {
 
-	private static final String	GET_VIDEO_BY_ID		= "SELECT * FROM videos WHERE id=?;";
+	private static final String	GET_VIDEO_BY_ID				= "SELECT * FROM videos WHERE id=?;";
 
-	private static final String	GET_VIDEO_BY_PATH	= "SELECT * FROM videos WHERE path=?;";
+	private static final String	GET_VIDEO_BY_PATH			= "SELECT * FROM videos WHERE path=?;";
 
-	private static final String	CREATE_VIDEO_FILE	=
-													"INSERT INTO videos (path,duration,size,width,height,framerate,extractedAudioLocation) VALUES(?,?,?,?,?,?,?);";
+	private static final String	CREATE_VIDEO_FILE			=
+													"INSERT INTO videos (file,duration,size,width,height,framerate,extractedAudioLocation) VALUES(?,?,?,?,?,?,?);";
 
-	private static final String	GET_LIBRARY_BY_ID	= "SELECT * FROM libraries WHERE id=?;";
+	private static final String	UPDATE_EXTRACTED_AUDIO_FILE	= "UPDATE videos SET extractedAudioFile=? WHERE id=?";
 
-	private static final String	UPDATE_LIBRARY_NAME	= "UPDATE libraries SET name=? WHERE id=?;";
+	private static final String	GET_LIBRARY_BY_ID			= "SELECT * FROM libraries WHERE id=?;";
 
-	private static final String	UPDATE_LIBRARY_DIR	= "UPDATE libraries SET dir=? WHERE id=?;";
+	private static final String	UPDATE_LIBRARY_NAME			= "UPDATE libraries SET name=? WHERE id=?;";
 
-	private static final String	UPDATE_LIBRARY_TYPE	= "UPDATE libraries SET type=? WHERE id=?;";
+	private static final String	UPDATE_LIBRARY_DIR			= "UPDATE libraries SET dir=? WHERE id=?;";
+
+	private static final String	UPDATE_LIBRARY_TYPE			= "UPDATE libraries SET type=? WHERE id=?;";
 
 	public static VideoFile getVideoFile(int id) {
+		DatabaseFactory.getDatabase().lock();
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.GET_VIDEO_BY_ID);
-			stmt.setInt(0, id);
+			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			return MediaDatabase.resultSetToVideoFile(rs);
 		} catch (SQLException e) {
 			LogFactory.getLog(MediaDatabase.class).warn("Failed to load videofile with ID " + id, e);
 			return null;
+		} finally {
+			DatabaseFactory.getDatabase().unlock();
 		}
 	}
 
 	public static VideoFile getVideoFile(String path) {
+		DatabaseFactory.getDatabase().lock();
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.GET_VIDEO_BY_PATH);
-			stmt.setString(0, path);
+			stmt.setString(1, path);
 			ResultSet rs = stmt.executeQuery();
 			return MediaDatabase.resultSetToVideoFile(rs);
 		} catch (SQLException e) {
 			LogFactory.getLog(MediaDatabase.class).warn("Failed to load videofile with Path \"" + path + "\"", e);
 			return null;
+		} finally {
+			DatabaseFactory.getDatabase().unlock();
 		}
 	}
 
 	public static VideoFile createVideoFile(String file, long duration, long size, int width, int height, float framerate, String extractedAudioFile) {
+		DatabaseFactory.getDatabase().lock();
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.CREATE_VIDEO_FILE);
-			stmt.setString(0, file);
-			stmt.setLong(1, duration);
-			stmt.setLong(2, size);
-			stmt.setInt(3, width);
-			stmt.setInt(4, height);
-			stmt.setFloat(5, framerate);
-			stmt.setString(6, extractedAudioFile);
+			stmt.setString(1, file);
+			stmt.setLong(2, duration);
+			stmt.setLong(3, size);
+			stmt.setInt(4, width);
+			stmt.setInt(5, height);
+			stmt.setFloat(6, framerate);
+			stmt.setString(7, extractedAudioFile);
 			stmt.executeUpdate();
-			return MediaDatabase.getVideoFile(file);
 		} catch (SQLException e) {
 			LogFactory.getLog(MediaDatabase.class).warn("Failed to create videofile with Path \"" + file + "\"", e);
 			return null;
+		} finally {
+			DatabaseFactory.getDatabase().unlock();
+		}
+		return MediaDatabase.getVideoFile(file);
+	}
+
+	public static void updateExtractedAudioFile(VideoFile videoFile) {
+		DatabaseFactory.getDatabase().lock();
+		try {
+			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.UPDATE_EXTRACTED_AUDIO_FILE);
+			stmt.setInt(2, videoFile.getId());
+			stmt.setString(1, videoFile.getExtractedAudioFile());
+			stmt.execute();
+		} catch (SQLException e) {
+			LogFactory.getLog(MediaDatabase.class).warn("Failed to update extractedAudioPath for videofile with ID " + videoFile.getId(), e);
+		} finally {
+			DatabaseFactory.getDatabase().unlock();
 		}
 	}
 
 	private static VideoFile resultSetToVideoFile(ResultSet rs) throws SQLException {
 		int id = rs.getInt("id");
-		String path = rs.getString("path");
+		String path = rs.getString("file");
 		long duration = rs.getLong("duration");
 		long size = rs.getLong("size");
 		int width = rs.getInt("width");
@@ -81,18 +106,22 @@ public abstract class MediaDatabase {
 	}
 
 	public static Library getLibrary(int id) {
+		DatabaseFactory.getDatabase().lock();
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.GET_LIBRARY_BY_ID);
-			stmt.setInt(0, id);
+			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			return MediaDatabase.resultSetToLibrary(rs);
 		} catch (SQLException e) {
 			LogFactory.getLog(MediaDatabase.class).warn("Failed to load library with ID " + id, e);
 			return null;
+		} finally {
+			DatabaseFactory.getDatabase().unlock();
 		}
 	}
 
 	private static Library resultSetToLibrary(ResultSet rs) throws SQLException {
+		DatabaseFactory.getDatabase().lock();
 		int id = rs.getInt("id");
 		String name = rs.getString("name");
 		String rootDir = rs.getString("dir");
@@ -101,35 +130,44 @@ public abstract class MediaDatabase {
 	}
 
 	public static void updateName(Library library) {
+		DatabaseFactory.getDatabase().lock();
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.UPDATE_LIBRARY_NAME);
-			stmt.setString(0, library.getName());
-			stmt.setInt(1, library.getId());
+			stmt.setString(1, library.getName());
+			stmt.setInt(2, library.getId());
 			stmt.execute();
 		} catch (SQLException e) {
 			LogFactory.getLog(MediaDatabase.class).warn("Failed to update name for library with ID " + library.getId(), e);
+		} finally {
+			DatabaseFactory.getDatabase().unlock();
 		}
 	}
 
 	public static void updateRootDirectory(Library library) {
+		DatabaseFactory.getDatabase().lock();
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.UPDATE_LIBRARY_DIR);
-			stmt.setString(0, library.getRootDirectory());
-			stmt.setInt(1, library.getId());
+			stmt.setString(1, library.getRootDirectory());
+			stmt.setInt(2, library.getId());
 			stmt.execute();
 		} catch (SQLException e) {
 			LogFactory.getLog(MediaDatabase.class).warn("Failed to update dir for library with ID " + library.getId(), e);
+		} finally {
+			DatabaseFactory.getDatabase().unlock();
 		}
 	}
 
 	public static void updateType(Library library) {
+		DatabaseFactory.getDatabase().lock();
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.UPDATE_LIBRARY_TYPE);
-			stmt.setInt(0, library.getType().DB_ID);
-			stmt.setInt(1, library.getId());
+			stmt.setInt(1, library.getType().DB_ID);
+			stmt.setInt(2, library.getId());
 			stmt.execute();
 		} catch (SQLException e) {
 			LogFactory.getLog(MediaDatabase.class).warn("Failed to update type for library with ID " + library.getId(), e);
+		} finally {
+			DatabaseFactory.getDatabase().unlock();
 		}
 	}
 }

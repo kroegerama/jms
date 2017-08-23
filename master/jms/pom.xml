@@ -29,6 +29,11 @@
 			<artifactId>config</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>de.janhoelscher.jms</groupId>
+			<artifactId>setup</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
