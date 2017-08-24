@@ -6,24 +6,24 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.LogFactory;
 
 import de.janhoelscher.jms.database.media.MediaDatabase;
 import de.janhoelscher.jms.database.media.VideoFile;
 import de.janhoelscher.jms.database.media.scan.ffmpeg.AudioStreamExtractor;
+import de.janhoelscher.jms.logging.Logger;
 import de.janhoelscher.jms.tasks.Task;
 import de.janhoelscher.jms.web.http.HttpRequestUri;
+import de.janhoelscher.jms.web.http.Request;
 import de.janhoelscher.jms.web.server.HttpRequestHandler;
-import de.janhoelscher.jms.web.server.Request;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response;
 
 public class MediaHttpRequestHander implements HttpRequestHandler {
 
 	@Override
-	public Response handleGetRequest(Request session) {
+	public Response handleHttpRequest(Request request) throws Exception {
 		try {
-			HttpRequestUri requestUri = HttpRequestUri.fromString(session.getUri());
+			HttpRequestUri requestUri = HttpRequestUri.fromString(request.getUri());
 			if (requestUri.getLastPart(1).equals("getvideo")) {
 				int id = Integer.parseInt(requestUri.getLastPart());
 				VideoFile file = MediaDatabase.getVideoFile(id);
@@ -35,35 +35,18 @@ public class MediaHttpRequestHander implements HttpRequestHandler {
 			} else if (requestUri.getLastPart().equals("rawvideo")) {
 				int id = Integer.parseInt(requestUri.getLastPart(1));
 				VideoFile file = MediaDatabase.getVideoFile(id);
-				return createRawVideoResponse(file, session);
+				return createRawVideoResponse(file, request);
 			} else if (requestUri.getLastPart().equals("extractedaudio")) {
 				int id = Integer.parseInt(requestUri.getLastPart(1));
 				VideoFile file = MediaDatabase.getVideoFile(id);
-				return createExtractedAudioResponse(file, session);
+				return createExtractedAudioResponse(file, request);
 			}
 		} catch (Exception e) {
-			LogFactory.getLog(MediaHttpRequestHander.class).warn("Failed to handle request: " + session, e);
+			Logger.warn("Failed to handle request: " + request, e);
+			//LogFactory.getLog(MediaHttpRequestHander.class).warn("Failed to handle request: " + session, e);
 			return NanoHTTPD.newFixedLengthResponse("500");
 		}
 		return NanoHTTPD.newFixedLengthResponse("404");
-	}
-
-	@Override
-	public Response handlePostRequest(Request session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Response handleHeadRequest(Request session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Response handleTraceRequest(Request session) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	private Response createVideoResponse(VideoFile file) throws IOException {
@@ -86,17 +69,18 @@ public class MediaHttpRequestHander implements HttpRequestHandler {
 		return NanoHTTPD.newFixedLengthResponse(videoPlayer);
 	}
 
-	private Response createRawVideoResponse(VideoFile file, Request session) throws IOException {
+	private Response createRawVideoResponse(VideoFile file, Request request) throws IOException {
 		File rawFile = new File(file.getFile());
-		return MediaFileServer.serveMediaFile(session, "video/webm", rawFile.length(), new FileInputStream(rawFile));
+		return MediaFileServer.serveMediaFile(request, "video/mp4", rawFile.length(), new FileInputStream(rawFile));
 	}
 
-	private Response createExtractedAudioResponse(VideoFile file, Request session) throws IOException {
+	private Response createExtractedAudioResponse(VideoFile file, Request request) throws IOException {
 		String audio = file.getExtractedAudioFile();
 		if (audio == null) {
 			Task<File> task = AudioStreamExtractor.extractAudio(file.getFile());
 			for (int tries = 1; tries < 4 && !task.getTaskInformation().getAdditionalInformation().exists(); tries++) {
-				LogFactory.getLog(MediaHttpRequestHander.class).info("Failed to get audio-file. Retrying in 1 second. (" + (3 - tries) + " tries left.");
+				Logger.info("Failed to get audio-file. Retrying in 1 second. (" + (3 - tries) + " tries left.");
+				//LogFactory.getLog(MediaHttpRequestHander.class).info("Failed to get audio-file. Retrying in 1 second. (" + (3 - tries) + " tries left.");
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
@@ -106,13 +90,18 @@ public class MediaHttpRequestHander implements HttpRequestHandler {
 			File rawFile = task.getTaskInformation().getAdditionalInformation();
 			file.setExtractedAudioFile(rawFile.getAbsolutePath());
 			if (task.isFinished()) {
-				return MediaFileServer.serveMediaFile(session, NanoHTTPD.getMimeTypeForFile(rawFile.getAbsolutePath()), rawFile.length(), new FileInputStream(rawFile));
+				return MediaFileServer.serveMediaFile(request, NanoHTTPD.getMimeTypeForFile(rawFile.getAbsolutePath()), rawFile.length(), new FileInputStream(rawFile));
 			} else {
-				return MediaFileServer.serveMediaFile(session, NanoHTTPD.getMimeTypeForFile(rawFile.getAbsolutePath()), rawFile.length(), new CautiousFileInputStream(task));
+				return MediaFileServer.serveMediaFile(request, NanoHTTPD.getMimeTypeForFile(rawFile.getAbsolutePath()), rawFile.length(), new CautiousFileInputStream(task));
 			}
 		} else {
 			File rawFile = new File(audio);
-			return MediaFileServer.serveMediaFile(session, NanoHTTPD.getMimeTypeForFile(audio), rawFile.length(), new FileInputStream(rawFile));
+			return MediaFileServer.serveMediaFile(request, NanoHTTPD.getMimeTypeForFile(audio), rawFile.length(), new FileInputStream(rawFile));
 		}
+	}
+
+	@Override
+	public boolean isLoginNeeded(Request request) {
+		return true;
 	}
 }

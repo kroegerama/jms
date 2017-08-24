@@ -6,11 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
-import java.util.concurrent.Semaphore;
 
 public class Database {
-
-	private final Semaphore								lock				= new Semaphore(1, true);
 
 	private final Connection							connection;
 
@@ -22,14 +19,6 @@ public class Database {
 
 	protected Connection getConnection() {
 		return connection;
-	}
-
-	public void lock() {
-		lock.acquireUninterruptibly();
-	}
-
-	public void unlock() {
-		lock.release();
 	}
 
 	public PreparedStatement prepareStatement(String sql) throws SQLException {

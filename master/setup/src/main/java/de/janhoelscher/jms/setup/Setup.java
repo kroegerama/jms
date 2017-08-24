@@ -6,12 +6,12 @@ import java.io.InputStreamReader;
 import java.util.Scanner;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.LogFactory;
 
 import de.janhoelscher.jms.config.Config;
 import de.janhoelscher.jms.database.Database;
 import de.janhoelscher.jms.database.DatabaseFactory;
 import de.janhoelscher.jms.database.media.scan.ffmpeg.FFmpeg;
+import de.janhoelscher.jms.logging.Logger;
 
 public abstract class Setup {
 
@@ -98,14 +98,13 @@ public abstract class Setup {
 			String media_structure = IOUtils.toString(new InputStreamReader(Setup.class.getResourceAsStream("/de/janhoelscher/jms/db_structure/media.sql")));
 			db.executeMultiple(media_structure);
 		} catch (Exception e) {
-			LogFactory.getLog(Setup.class).error("Failed to create media databse structure!", e);
+			Logger.warn("Failed to create media databse structure!", e);
 		}
-		// ### Commented out, because users.sql is work in progress ###
-		//		try {
-		//			String users_structure = IOUtils.toString(new InputStreamReader(Setup.class.getResourceAsStream("/de/janhoelscher/jms/db_structure/users.sql")));
-		//			db.execute(users_structure);
-		//		} catch (Exception e) {
-		//			LogFactory.getLog(Setup.class).error("Failed to create media databse structure!", e);
-		//		}
+		try {
+			String users_structure = IOUtils.toString(new InputStreamReader(Setup.class.getResourceAsStream("/de/janhoelscher/jms/db_structure/users.sql")));
+			db.executeMultiple(users_structure);
+		} catch (Exception e) {
+			Logger.warn("Failed to create user databse structure!", e);
+		}
 	}
 }

@@ -5,9 +5,8 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
-import org.apache.commons.logging.LogFactory;
-
 import de.janhoelscher.jms.config.Config;
+import de.janhoelscher.jms.logging.Logger;
 
 public class DatabaseFactory {
 
@@ -38,7 +37,8 @@ public class DatabaseFactory {
 		try {
 			return DatabaseFactory.getConnectionProvider().openConnection(dbName, username, password);
 		} catch (SQLException e) {
-			LogFactory.getLog(DatabaseFactory.class).error("Failed to open connection to database \"" + dbName + "\".", e);
+			Logger.error("Failed to open connection to database \"" + dbName + "\".", e);
+			//LogFactory.getLog(DatabaseFactory.class).error("Failed to open connection to database \"" + dbName + "\".", e);
 		}
 		return null;
 	}
@@ -47,7 +47,8 @@ public class DatabaseFactory {
 		try {
 			DatabaseFactory.database.getConnection().close();
 		} catch (SQLException e) {
-			LogFactory.getLog(DatabaseFactory.class).warn("Failed to close database connection!", e);
+			Logger.error("Failed to close database connection!", e);
+			//LogFactory.getLog(DatabaseFactory.class).warn("Failed to close database connection!", e);
 		}
 		DatabaseFactory.database = null;
 	}

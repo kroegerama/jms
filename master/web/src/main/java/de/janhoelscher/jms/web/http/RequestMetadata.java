@@ -1,13 +1,13 @@
-package de.janhoelscher.jms.web.server;
+package de.janhoelscher.jms.web.http;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-public class RequestMetadata {
+import de.janhoelscher.jms.config.Config;
 
-	private static final int						METADATA_DELETION_TIME	= 1200000;	// 20 minutes
+public class RequestMetadata {
 
 	private static Thread							metadataCleanupThread;
 
@@ -43,7 +43,7 @@ public class RequestMetadata {
 		List<String> clientsToCleanup = new LinkedList<>();
 		while (RequestMetadata.metadataCleanupThread != null) {
 			for (Entry<String, Long> entry : RequestMetadata.metadataUsage.entrySet()) {
-				if (entry.getValue() < System.currentTimeMillis() - RequestMetadata.METADATA_DELETION_TIME) {
+				if (entry.getValue() < System.currentTimeMillis() - Config.getInstance().Web.SessionTimeout) {
 					clientsToCleanup.add(entry.getKey());
 				}
 			}
@@ -66,6 +66,7 @@ public class RequestMetadata {
 
 	private RequestMetadata(String clientId) {
 		this.clientId = clientId;
+		this.clientMetadata = new HashMap<>();
 	}
 
 	public String getClientId() {

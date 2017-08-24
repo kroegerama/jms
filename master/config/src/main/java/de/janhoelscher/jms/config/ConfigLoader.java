@@ -8,7 +8,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.commons.logging.LogFactory;
+import de.janhoelscher.jms.logging.Logger;
 
 abstract class ConfigLoader {
 
@@ -23,7 +23,8 @@ abstract class ConfigLoader {
 			saveConfig(res);
 			return res;
 		} catch (Exception e) {
-			LogFactory.getLog(ConfigLoader.class).warn("Failed to load config!", e);
+			Logger.warn("Failed to load config!");
+			//LogFactory.getLog(ConfigLoader.class).warn("Failed to load config!", e);
 			return null;
 		}
 	}
@@ -35,7 +36,8 @@ abstract class ConfigLoader {
 			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 			m.marshal(config, cfgFile);
 		} catch (Exception e) {
-			LogFactory.getLog(ConfigLoader.class).warn("Failed to save config!", e);
+			Logger.warn("Failed to save config!");
+			//LogFactory.getLog(ConfigLoader.class).warn("Failed to save config!", e);
 		}
 	}
 

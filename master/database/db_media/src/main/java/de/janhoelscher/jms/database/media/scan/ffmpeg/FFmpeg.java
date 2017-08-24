@@ -5,9 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
-import org.apache.commons.logging.LogFactory;
-
 import de.janhoelscher.jms.config.Config;
+import de.janhoelscher.jms.logging.Logger;
 
 public class FFmpeg {
 
@@ -22,7 +21,8 @@ public class FFmpeg {
 				builder.redirectOutput(file);
 				builder.start().waitFor();
 			} catch (Exception e) {
-				LogFactory.getLog(FFmpeg.class).warn("Failed to run program.", e);
+				Logger.warn("Failed to run program.", e);
+				//LogFactory.getLog(FFmpeg.class).warn("Failed to run program.", e);
 			}
 		};
 	}

@@ -2,17 +2,12 @@ package de.janhoelscher.jms.database.users;
 
 public class User {
 
-	private final int		id;
 	private final String	name;
+
 	private Group			group;
 
-	protected User(int id, String name) {
-		this.id = id;
+	protected User(String name) {
 		this.name = name;
-	}
-
-	public int getId() {
-		return id;
 	}
 
 	public String getName() {
@@ -28,7 +23,7 @@ public class User {
 
 	public void setGroup(Group group) {
 		this.group = group;
-		if (this.group.getId() != group.getId()) {
+		if (!this.group.getName().equals(group.getName())) {
 			UserDatabase.updateUserGroup(this);
 		}
 	}
@@ -39,7 +34,7 @@ public class User {
 
 	@Override
 	public int hashCode() {
-		return id;
+		return name.hashCode();
 	}
 
 	@Override
@@ -54,9 +49,6 @@ public class User {
 			return false;
 		}
 		User other = (User) obj;
-		if (id != other.id) {
-			return false;
-		}
 		if (name == null) {
 			if (other.name != null) {
 				return false;
@@ -64,6 +56,6 @@ public class User {
 		} else if (!name.equals(other.name)) {
 			return false;
 		}
-		return getGroup().getId() == other.getGroup().getId();
+		return getGroup().getName().equals(other.getGroup().getName());
 	}
 }

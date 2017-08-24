@@ -9,14 +9,12 @@ import java.util.ServiceLoader;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.logging.LogFactory;
-
 import de.janhoelscher.jms.database.media.ImageFile;
 import de.janhoelscher.jms.database.media.Library;
-import de.janhoelscher.jms.database.media.MediaDatabase;
 import de.janhoelscher.jms.database.media.MediaFile;
 import de.janhoelscher.jms.database.media.scan.ffmpeg.AudioInfoExtractor;
 import de.janhoelscher.jms.database.media.scan.ffmpeg.VideoInfoExtractor;
+import de.janhoelscher.jms.logging.Logger;
 
 public class MediaScanner {
 
@@ -70,7 +68,8 @@ public class MediaScanner {
 					break;
 			}
 		} catch (IOException e) {
-			LogFactory.getLog(MediaScanner.class).warn("Failed to scan file \"" + file.getAbsolutePath() + "\"", e);
+			Logger.warn("Failed to scan file \"" + file.getAbsolutePath() + "\"", e);
+			//LogFactory.getLog(MediaScanner.class).warn("Failed to scan file \"" + file.getAbsolutePath() + "\"", e);
 			return;
 		}
 
@@ -91,7 +90,8 @@ public class MediaScanner {
 			BufferedImage image = ImageIO.read(imageFile);
 			return new ImageFile(-1, imageFile.getAbsolutePath(), imageFile.length(), image.getWidth(), image.getHeight());
 		} catch (IOException e) {
-			LogFactory.getLog(MediaDatabase.class).warn("Failed to load ImageFile \"" + imageFile + "\"", e);
+			Logger.warn("Failed to load ImageFile \"" + imageFile + "\"", e);
+			//LogFactory.getLog(MediaDatabase.class).warn("Failed to load ImageFile \"" + imageFile + "\"", e);
 			return null;
 		}
 	}

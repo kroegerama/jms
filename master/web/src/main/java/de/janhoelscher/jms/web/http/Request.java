@@ -1,4 +1,4 @@
-package de.janhoelscher.jms.web.server;
+package de.janhoelscher.jms.web.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +8,7 @@ import java.util.UUID;
 import fi.iki.elonen.NanoHTTPD.CookieHandler;
 import fi.iki.elonen.NanoHTTPD.IHTTPSession;
 import fi.iki.elonen.NanoHTTPD.Method;
+import fi.iki.elonen.NanoHTTPD.Response;
 import fi.iki.elonen.NanoHTTPD.ResponseException;
 
 public class Request implements IHTTPSession {
@@ -18,7 +19,7 @@ public class Request implements IHTTPSession {
 		String clientId = session.getCookies().read(Request.CLIENT_ID_COOKIE_NAME);
 		if (clientId == null) {
 			clientId = UUID.randomUUID().toString();
-			session.getCookies().set(Request.CLIENT_ID_COOKIE_NAME, clientId, 0);
+			session.getCookies().set(Request.CLIENT_ID_COOKIE_NAME, clientId, 1);
 		}
 		return new Request(session, RequestMetadata.getMetadata(clientId));
 	}
@@ -27,9 +28,15 @@ public class Request implements IHTTPSession {
 
 	private final RequestMetadata	metadata;
 
+	private HttpRequestUri			requestUri;
+
 	private Request(IHTTPSession httpSession, RequestMetadata metadata) {
 		this.httpSession = httpSession;
 		this.metadata = metadata;
+	}
+
+	public void finalize(Response response) {
+		httpSession.getCookies().unloadQueue(response);
 	}
 
 	public IHTTPSession getHttpSession() {
@@ -38,6 +45,13 @@ public class Request implements IHTTPSession {
 
 	public RequestMetadata getMetadata() {
 		return metadata;
+	}
+
+	public HttpRequestUri getRequestUri() {
+		if (requestUri == null) {
+			requestUri = HttpRequestUri.fromString(httpSession.getUri());
+		}
+		return requestUri;
 	}
 
 	@Override

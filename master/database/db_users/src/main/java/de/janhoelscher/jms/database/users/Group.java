@@ -4,17 +4,12 @@ import de.janhoelscher.jms.database.users.permissions.PermissionSet;
 
 public class Group {
 
-	private final int		id;
 	private final String	name;
+
 	private PermissionSet	permissions;
 
-	protected Group(int id, String name) {
-		this.id = id;
+	protected Group(String name) {
 		this.name = name;
-	}
-
-	public int getId() {
-		return id;
 	}
 
 	public String getName() {

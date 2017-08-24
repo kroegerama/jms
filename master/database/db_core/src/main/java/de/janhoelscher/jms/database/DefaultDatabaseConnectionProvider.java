@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.LogFactory;
+import de.janhoelscher.jms.logging.Logger;
 
 public class DefaultDatabaseConnectionProvider implements DatabaseConnectionProvider {
 
@@ -16,7 +16,8 @@ public class DefaultDatabaseConnectionProvider implements DatabaseConnectionProv
 				Class.forName("org.sqlite.JDBC");
 				DefaultDatabaseConnectionProvider.driverLoaded = true;
 			} catch (ClassNotFoundException e) {
-				LogFactory.getLog(DefaultDatabaseConnectionProvider.class).error("Failed to load SQLite JDBC driver!", e);
+				Logger.error("Failed to load SQLite JDBC driver!", e);
+				//LogFactory.getLog(DefaultDatabaseConnectionProvider.class).error("Failed to load SQLite JDBC driver!", e);
 			}
 		}
 		return DefaultDatabaseConnectionProvider.driverLoaded;

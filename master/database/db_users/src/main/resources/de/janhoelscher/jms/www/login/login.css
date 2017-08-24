@@ -1,0 +1,68 @@
+body {
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	background: #262626;
+}
+
+.loginbox {
+	position: absolute;
+	top: 40%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	border-radius: 10px;
+}
+
+.loginbox hr {
+	border: 0px;
+	border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.loginbox .title {
+	position: relative;
+	width: 100%;
+	text-align: center;
+	color: rgba(0, 255, 255, 0.5);
+}
+
+.loginbox .login .input {
+	transition: padding,background,border-bottom 0.2s;
+	
+	width: 100%;
+	padding: 12px 20px;
+    margin: 8px 0;
+	
+	border: none;
+    border-bottom: 2px solid rgba(0, 255, 255, 0.5);
+    border-radius: 0px;
+    outline: none;
+    
+    color: #FFF;
+    
+    background: rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.loginbox .login .input:focus {
+	padding: 15px 20px;
+	background: rgba(255, 255, 255, 0.2);
+	border-bottom: 2px solid rgba(0, 255, 255, 0.8);
+}
+
+.loginbox .login .submit {
+	width: 100%;
+	padding: 12px 20px;
+	margin-top: 15px;
+	
+	border: none;
+	border: 2px solid rgba(0, 255, 255, 0.5);
+    border-radius: 0px;
+    outline: none;
+    
+    color: #FFF;
+    
+    background: rgba(255, 255, 255, 0.1);
+    text-align: center;
+}

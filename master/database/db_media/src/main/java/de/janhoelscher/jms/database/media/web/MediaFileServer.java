@@ -4,8 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import de.janhoelscher.jms.web.http.HttpConstants;
-import de.janhoelscher.jms.web.server.Request;
+import de.janhoelscher.jms.web.http.Request;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
@@ -26,10 +25,8 @@ class MediaFileServer {
 					return MediaFileServer.createPartialResponse(input, mimeType, range, fileLength);
 				}
 			} else {
-				Response res = MediaFileServer.createResponse(Response.Status.OK, mimeType, input, fileLength);
-				res.setChunkedTransfer(true);
+				Response res = MediaFileServer.createResponse(Response.Status.OK, mimeType, input);
 				res.setGzipEncoding(true);
-				res.addHeader("Content-Length", "" + fileLength);
 				return res;
 			}
 		} catch (IOException ioe) {
@@ -47,11 +44,8 @@ class MediaFileServer {
 		}
 
 		in.skip(range[0]);
-		Response res = MediaFileServer.createResponse(Status.PARTIAL_CONTENT, mimeType, in, fileLength);
-		res.addHeader(HttpConstants.CONTENT_LENGTH, "" + length);
+		Response res = MediaFileServer.createResponse(Status.PARTIAL_CONTENT, mimeType, in);
 		res.addHeader("Content-Range", "bytes " + range[0] + "-" + range[1] + "/" + fileLength);
-		res.addHeader(HttpConstants.CONTENT_TYPE, mimeType);
-		res.setChunkedTransfer(true);
 		res.setGzipEncoding(true);
 		return res;
 	}
@@ -62,9 +56,8 @@ class MediaFileServer {
 		return res;
 	}
 
-	private static Response createResponse(Response.Status status, String mimeType, InputStream message, long length) {
-		Response res = NanoHTTPD.newChunkedResponse(status, mimeType, message);// .newFixedLengthResponse(status, mimeType, message,
-																				// length);
+	private static Response createResponse(Response.Status status, String mimeType, InputStream message) {
+		Response res = NanoHTTPD.newChunkedResponse(status, mimeType, message);
 		res.addHeader("Accept-Ranges", "bytes");
 		return res;
 	}

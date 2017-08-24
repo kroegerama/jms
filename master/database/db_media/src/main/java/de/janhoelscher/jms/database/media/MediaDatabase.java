@@ -4,10 +4,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.LogFactory;
-
 import de.janhoelscher.jms.database.DatabaseFactory;
 import de.janhoelscher.jms.database.media.Library.LibraryType;
+import de.janhoelscher.jms.logging.Logger;
 
 public abstract class MediaDatabase {
 
@@ -29,37 +28,33 @@ public abstract class MediaDatabase {
 	private static final String	UPDATE_LIBRARY_TYPE			= "UPDATE libraries SET type=? WHERE id=?;";
 
 	public static VideoFile getVideoFile(int id) {
-		DatabaseFactory.getDatabase().lock();
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.GET_VIDEO_BY_ID);
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			return MediaDatabase.resultSetToVideoFile(rs);
 		} catch (SQLException e) {
-			LogFactory.getLog(MediaDatabase.class).warn("Failed to load videofile with ID " + id, e);
+			Logger.warn("Failed to load videofile with ID " + id, e);
+			//LogFactory.getLog(MediaDatabase.class).warn("Failed to load videofile with ID " + id, e);
 			return null;
-		} finally {
-			DatabaseFactory.getDatabase().unlock();
 		}
 	}
 
 	public static VideoFile getVideoFile(String path) {
-		DatabaseFactory.getDatabase().lock();
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.GET_VIDEO_BY_PATH);
 			stmt.setString(1, path);
 			ResultSet rs = stmt.executeQuery();
 			return MediaDatabase.resultSetToVideoFile(rs);
 		} catch (SQLException e) {
-			LogFactory.getLog(MediaDatabase.class).warn("Failed to load videofile with Path \"" + path + "\"", e);
+			Logger.warn("Failed to load videofile with Path \"" + path + "\"", e);
+			//LogFactory.getLog(MediaDatabase.class).warn("Failed to load videofile with Path \"" + path + "\"", e);
 			return null;
-		} finally {
-			DatabaseFactory.getDatabase().unlock();
 		}
 	}
 
 	public static VideoFile createVideoFile(String file, long duration, long size, int width, int height, float framerate, String extractedAudioFile) {
-		DatabaseFactory.getDatabase().lock();
+
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.CREATE_VIDEO_FILE);
 			stmt.setString(1, file);
@@ -71,25 +66,23 @@ public abstract class MediaDatabase {
 			stmt.setString(7, extractedAudioFile);
 			stmt.executeUpdate();
 		} catch (SQLException e) {
-			LogFactory.getLog(MediaDatabase.class).warn("Failed to create videofile with Path \"" + file + "\"", e);
+			Logger.warn("Failed to create videofile with Path \"" + file + "\"", e);
+			//LogFactory.getLog(MediaDatabase.class).warn("Failed to create videofile with Path \"" + file + "\"", e);
 			return null;
-		} finally {
-			DatabaseFactory.getDatabase().unlock();
 		}
 		return MediaDatabase.getVideoFile(file);
 	}
 
 	public static void updateExtractedAudioFile(VideoFile videoFile) {
-		DatabaseFactory.getDatabase().lock();
+
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.UPDATE_EXTRACTED_AUDIO_FILE);
 			stmt.setInt(2, videoFile.getId());
 			stmt.setString(1, videoFile.getExtractedAudioFile());
 			stmt.execute();
 		} catch (SQLException e) {
-			LogFactory.getLog(MediaDatabase.class).warn("Failed to update extractedAudioPath for videofile with ID " + videoFile.getId(), e);
-		} finally {
-			DatabaseFactory.getDatabase().unlock();
+			Logger.warn("Failed to update extractedAudioPath for videofile with ID " + videoFile.getId(), e);
+			//LogFactory.getLog(MediaDatabase.class).warn("Failed to update extractedAudioPath for videofile with ID " + videoFile.getId(), e);
 		}
 	}
 
@@ -106,22 +99,21 @@ public abstract class MediaDatabase {
 	}
 
 	public static Library getLibrary(int id) {
-		DatabaseFactory.getDatabase().lock();
+
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.GET_LIBRARY_BY_ID);
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			return MediaDatabase.resultSetToLibrary(rs);
 		} catch (SQLException e) {
-			LogFactory.getLog(MediaDatabase.class).warn("Failed to load library with ID " + id, e);
+			Logger.warn("Failed to load library with ID " + id, e);
+			//LogFactory.getLog(MediaDatabase.class).warn("Failed to load library with ID " + id, e);
 			return null;
-		} finally {
-			DatabaseFactory.getDatabase().unlock();
 		}
 	}
 
 	private static Library resultSetToLibrary(ResultSet rs) throws SQLException {
-		DatabaseFactory.getDatabase().lock();
+
 		int id = rs.getInt("id");
 		String name = rs.getString("name");
 		String rootDir = rs.getString("dir");
@@ -130,44 +122,41 @@ public abstract class MediaDatabase {
 	}
 
 	public static void updateName(Library library) {
-		DatabaseFactory.getDatabase().lock();
+
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.UPDATE_LIBRARY_NAME);
 			stmt.setString(1, library.getName());
 			stmt.setInt(2, library.getId());
 			stmt.execute();
 		} catch (SQLException e) {
-			LogFactory.getLog(MediaDatabase.class).warn("Failed to update name for library with ID " + library.getId(), e);
-		} finally {
-			DatabaseFactory.getDatabase().unlock();
+			Logger.warn("Failed to update name for library with ID " + library.getId(), e);
+			//LogFactory.getLog(MediaDatabase.class).warn("Failed to update name for library with ID " + library.getId(), e);
 		}
 	}
 
 	public static void updateRootDirectory(Library library) {
-		DatabaseFactory.getDatabase().lock();
+
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.UPDATE_LIBRARY_DIR);
 			stmt.setString(1, library.getRootDirectory());
 			stmt.setInt(2, library.getId());
 			stmt.execute();
 		} catch (SQLException e) {
-			LogFactory.getLog(MediaDatabase.class).warn("Failed to update dir for library with ID " + library.getId(), e);
-		} finally {
-			DatabaseFactory.getDatabase().unlock();
+			Logger.warn("Failed to update dir for library with ID " + library.getId(), e);
+			//LogFactory.getLog(MediaDatabase.class).warn("Failed to update dir for library with ID " + library.getId(), e);
 		}
 	}
 
 	public static void updateType(Library library) {
-		DatabaseFactory.getDatabase().lock();
+
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(MediaDatabase.UPDATE_LIBRARY_TYPE);
 			stmt.setInt(1, library.getType().DB_ID);
 			stmt.setInt(2, library.getId());
 			stmt.execute();
 		} catch (SQLException e) {
-			LogFactory.getLog(MediaDatabase.class).warn("Failed to update type for library with ID " + library.getId(), e);
-		} finally {
-			DatabaseFactory.getDatabase().unlock();
+			Logger.warn("Failed to update type for library with ID " + library.getId(), e);
+			//LogFactory.getLog(MediaDatabase.class).warn("Failed to update type for library with ID " + library.getId(), e);
 		}
 	}
 }

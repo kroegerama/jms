@@ -4,61 +4,71 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.LogFactory;
-
 import de.janhoelscher.jms.database.DatabaseFactory;
 import de.janhoelscher.jms.database.users.permissions.PermissionSet;
+import de.janhoelscher.jms.logging.Logger;
 
 public abstract class UserDatabase {
+
 	// Users
-	private static final String	GET_USER_BY_ID					= "SELECT id,name FROM users WHERE id=?;";
-	private static final String	GET_USER_BY_NAME				= "SELECT id,name FROM users WHERE name=\"?\";";
+	private static final String	GET_USER_BY_NAME				= "SELECT name FROM users WHERE name=?;";
+
+	private static final String	GET_USER_PASSWORD				= "SELECT password FROM users WHERE name=?";
+
 	private static final String	CREATE_USER						= "INSERT INTO users (name, password) VALUES(?, ?)";
-	private static final String	UPDATE_USER_GROUP				= "UPDATE users SET group=? WHERE id=?";
+
+	private static final String	UPDATE_USER_GROUP				= "UPDATE users SET groupname=? WHERE name=?";
 
 	// Groups
-	private static final String	GET_GROUP_BY_ID					= "SELECT id,name FROM groups WHERE id=?;";
-	private static final String	GET_GROUP_BY_NAME				= "SELECT id,name FROM groups WHERE name=?;";
-	private static final String	GET_GROUP_BY_USER				=
-													"SELECT id,name FROM (groups INNER JOIN users ON users.groupid=groups.id AND users.id=?);";
-	private static final String	GET_PERMISSIONS					= "SELECT permissions FROM groups WHERE id=?";
-	private static final String	CREATE_GROUP					= "INSERT INTO groups (name) VALUES(?)";
-	private static final String	CREATE_GROUP_WITH_PERMISSIONS	= "INSERT INTO groups (name, permissions) VALUES(?, ?)";
-	private static final String	UPDATE_PERMISSIONS				= "UPDATE groups SET permissions=? WHERE id=?";
+	private static final String	GET_GROUP_BY_NAME				= "SELECT name FROM groups WHERE name=?";
 
-	public static User getUser(int id) {
-		try {
-			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.GET_USER_BY_ID);
-			stmt.setInt(0, id);
-			ResultSet rs = stmt.executeQuery();
-			return new User(rs.getInt("id"), rs.getString("name"));
-		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed to load user with ID " + id, e);
-			return null;
-		}
-	}
+	private static final String	GET_GROUP_BY_USER				=
+													"SELECT name FROM (groups INNER JOIN users ON users.groupname=groups.name AND users.name=?);";
+
+	private static final String	GET_PERMISSIONS					= "SELECT permissions FROM groups WHERE name=?";
+
+	private static final String	CREATE_GROUP					= "INSERT INTO groups (name) VALUES(?)";
+
+	private static final String	CREATE_GROUP_WITH_PERMISSIONS	= "INSERT INTO groups (name, permissions) VALUES(?, ?)";
+
+	private static final String	UPDATE_PERMISSIONS				= "UPDATE groups SET permissions=? WHERE name=?";
 
 	public static User getUser(String name) {
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.GET_USER_BY_NAME);
-			stmt.setString(0, name);
+			stmt.setString(1, name);
 			ResultSet rs = stmt.executeQuery();
-			return new User(rs.getInt("id"), rs.getString("name"));
+			if (!rs.next()) {
+				return null;
+			}
+			return new User(rs.getString("name"));
 		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed to load user with Name \"" + name + "\"", e);
+			Logger.warn("Failed to load user with Name \"" + name + "\"", e);
 			return null;
+		}
+	}
+
+	public static boolean passwordMatches(User user, String passwordHash) {
+		try {
+			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.GET_USER_PASSWORD);
+			stmt.setString(1, user.getName());
+			ResultSet rs = stmt.executeQuery();
+			return rs.getString("password").equals(passwordHash);
+		} catch (SQLException e) {
+			Logger.warn("Failed to verify password for user \"" + user + "\"", e);
+			return false;
 		}
 	}
 
 	public static User createUser(String name, String passwordHash) {
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.CREATE_USER);
-			stmt.setString(0, name);
-			stmt.setString(1, passwordHash);
+			stmt.setString(1, name);
+			stmt.setString(2, passwordHash);
 			stmt.executeUpdate();
 			return UserDatabase.getUser(name);
 		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed create user \"" + name + "\"", e);
+			Logger.warn("Failed create user \"" + name + "\"", e);
 			return null;
 		}
 	}
@@ -66,34 +76,22 @@ public abstract class UserDatabase {
 	public static void updateUserGroup(User user) {
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.UPDATE_USER_GROUP);
-			stmt.setInt(1, user.getId());
-			stmt.setInt(0, user.getGroup().getId());
+			stmt.setString(1, user.getGroup().getName());
+			stmt.setString(2, user.getName());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed to update group for user " + user, e);
-		}
-	}
-
-	public static Group getGroup(int id) {
-		try {
-			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.GET_GROUP_BY_ID);
-			stmt.setInt(0, id);
-			ResultSet rs = stmt.executeQuery();
-			return new Group(rs.getInt("id"), rs.getString("name"));
-		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed to load group with id " + id, e);
-			return null;
+			Logger.warn("Failed to update group for user " + user, e);
 		}
 	}
 
 	public static Group getGroup(String name) {
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.GET_GROUP_BY_NAME);
-			stmt.setString(0, name);
+			stmt.setString(1, name);
 			ResultSet rs = stmt.executeQuery();
-			return new Group(rs.getInt("id"), rs.getString("name"));
+			return new Group(rs.getString("name"));
 		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed to load group with name \"" + name + "\"", e);
+			Logger.warn("Failed to load group with name \"" + name + "\"", e);
 			return null;
 		}
 	}
@@ -101,11 +99,11 @@ public abstract class UserDatabase {
 	public static Group getGroup(User user) {
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.GET_GROUP_BY_USER);
-			stmt.setInt(0, user.getId());
+			stmt.setString(1, user.getName());
 			ResultSet rs = stmt.executeQuery();
-			return new Group(rs.getInt("id"), rs.getString("name"));
+			return new Group(rs.getString("name"));
 		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed to load group for user " + user, e);
+			Logger.warn("Failed to load group for user " + user, e);
 			return null;
 		}
 	}
@@ -113,11 +111,11 @@ public abstract class UserDatabase {
 	public static PermissionSet getPermissions(Group group) {
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.GET_PERMISSIONS);
-			stmt.setInt(0, group.getId());
+			stmt.setString(1, group.getName());
 			ResultSet rs = stmt.executeQuery();
 			return PermissionSet.fromString(rs.getString("permissions"));
 		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed to load permissions for group " + group, e);
+			Logger.warn("Failed to load permissions for group " + group, e);
 			return null;
 		}
 	}
@@ -125,36 +123,35 @@ public abstract class UserDatabase {
 	public static void updatePermissions(Group group) {
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.UPDATE_PERMISSIONS);
-			stmt.setInt(1, group.getId());
-			stmt.setString(0, group.getPermissions().toString());
+			stmt.setString(1, group.getPermissions().toString());
+			stmt.setString(2, group.getName());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed to update permissions for group " + group, e);
+			Logger.warn("Failed to update permissions for group " + group, e);
 		}
 	}
 
 	public static Group createGroup(String name) {
 		try {
 			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.CREATE_GROUP);
-			stmt.setString(0, name);
+			stmt.setString(1, name);
 			stmt.executeUpdate();
 			return UserDatabase.getGroup(name);
 		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed create group \"" + name + "\"", e);
+			Logger.warn("Failed create group \"" + name + "\"", e);
 			return null;
 		}
 	}
 
 	public static Group createGroupWithPermissions(String name, PermissionSet permissions) {
 		try {
-			PreparedStatement stmt = DatabaseFactory.getDatabase()
-													.prepareStatement(UserDatabase.CREATE_GROUP_WITH_PERMISSIONS);
-			stmt.setString(0, name);
-			stmt.setString(1, permissions.toString());
+			PreparedStatement stmt = DatabaseFactory.getDatabase().prepareStatement(UserDatabase.CREATE_GROUP_WITH_PERMISSIONS);
+			stmt.setString(1, name);
+			stmt.setString(2, permissions.toString());
 			stmt.executeUpdate();
 			return UserDatabase.getGroup(name);
 		} catch (SQLException e) {
-			LogFactory.getLog(UserDatabase.class).warn("Failed create group \"" + name + "\"", e);
+			Logger.warn("Failed create group \"" + name + "\"", e);
 			return null;
 		}
 	}

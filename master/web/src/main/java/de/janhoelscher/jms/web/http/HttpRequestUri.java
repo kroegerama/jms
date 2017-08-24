@@ -34,7 +34,11 @@ public class HttpRequestUri {
 	}
 
 	public String getLastPart(int index) {
-		return pathParts[pathParts.length - index - 1];
+		index = pathParts.length - index - 1;
+		if (index >= 0 && index < pathParts.length) {
+			return pathParts[index];
+		}
+		return "";
 	}
 
 	public String getParam(String name) {

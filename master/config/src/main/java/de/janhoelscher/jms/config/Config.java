@@ -29,6 +29,9 @@ public class Config {
 	@XmlElement(required = true)
 	public Database		Database		= new Database();
 
+	@XmlElement(required = true)
+	public Web			Web				= new Web();
+
 	protected Config() {
 
 	}
@@ -67,5 +70,11 @@ public class Config {
 
 		@XmlElement(required = true)
 		public String Name = "database";
+	}
+
+	public static class Web {
+
+		public long SessionTimeout = 1200000; // 20 minutes
+
 	}
 }
