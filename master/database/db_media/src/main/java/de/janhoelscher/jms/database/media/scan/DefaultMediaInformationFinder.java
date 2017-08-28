@@ -9,5 +9,4 @@ class DefaultMediaInformationFinder implements MediaInformationFinder {
 	public boolean findMediaInformation(LibraryType type, MediaFile media) {
 		return false;
 	}
-
 }

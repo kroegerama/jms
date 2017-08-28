@@ -2,19 +2,21 @@ package de.janhoelscher.jms.database.media;
 
 public class Library {
 
-	private final int	id;
+	public static final Library	NO_LIBRARY	= new Library(-1, null, null, null);
 
-	private String		name;
+	private final int			id;
 
-	private String		rootDirectory;
+	private String				name;
 
-	private LibraryType	type;
+	private final LibraryType	type;
 
-	public Library(int id, String name, String rootDirectory, LibraryType type) {
+	private final String		rootDir;
+
+	public Library(int id, String name, LibraryType type, String rootDirectory) {
 		this.id = id;
 		this.name = name;
-		this.rootDirectory = rootDirectory;
 		this.type = type;
+		this.rootDir = rootDirectory;
 	}
 
 	public int getId() {
@@ -32,26 +34,12 @@ public class Library {
 		}
 	}
 
-	public String getRootDirectory() {
-		return rootDirectory;
-	}
-
-	public void setRootDirectory(String rootDirectory) {
-		if (!this.rootDirectory.equals(rootDirectory)) {
-			this.rootDirectory = rootDirectory;
-			MediaDatabase.updateRootDirectory(this);
-		}
+	public String getRootDir() {
+		return rootDir;
 	}
 
 	public LibraryType getType() {
 		return type;
-	}
-
-	public void setType(LibraryType type) {
-		if (this.type != type) {
-			this.type = type;
-			MediaDatabase.updateType(this);
-		}
 	}
 
 	public static enum LibraryType {
@@ -60,10 +48,10 @@ public class Library {
 									MUSIC(2),
 									PICTURES(3);
 
-		public final int DB_ID;
+		public final int RAW_TYPE;
 
 		private LibraryType(int dbId) {
-			this.DB_ID = dbId;
+			this.RAW_TYPE = dbId;
 		}
 
 		public static LibraryType valueOf(int id) {

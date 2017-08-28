@@ -6,14 +6,16 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 import de.janhoelscher.jms.database.media.AudioFile;
+import de.janhoelscher.jms.database.media.Library;
+import de.janhoelscher.jms.database.media.MediaDatabase;
 
 public class AudioInfoExtractor {
 
-	public static AudioFile getAudioFileInformation(String path) throws IOException {
-		return AudioInfoExtractor.getAudioFileInformation(new File(path));
+	public static AudioFile getAudioFileInformation(Library lib, String path) throws IOException {
+		return AudioInfoExtractor.getAudioFileInformation(lib, new File(path));
 	}
 
-	public static AudioFile getAudioFileInformation(File file) throws IOException {
+	public static AudioFile getAudioFileInformation(Library lib, File file) throws IOException {
 		InputStream in = FFmpeg.runFFmpeg("-i \"" + file.getPath() + "\"");
 		Scanner scan = new Scanner(in);
 		long[] durationAndBitrate = new long[] { -1, -1 };
@@ -25,7 +27,7 @@ public class AudioInfoExtractor {
 			}
 		}
 		scan.close();
-		return new AudioFile(-1, file.getAbsolutePath(), durationAndBitrate[0], file.length(), (int) durationAndBitrate[1]);
+		return MediaDatabase.createAudioFile(lib, file.getAbsolutePath(), file.length(), durationAndBitrate[0], (int) durationAndBitrate[1]);
 	}
 
 	private static long[] getDurationAndBitrate(String line) {

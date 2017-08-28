@@ -14,13 +14,13 @@ import de.janhoelscher.jms.tasks.Task;
  */
 class CautiousFileInputStream extends InputStream {
 
-	private static final int		caution	= 1024;
+	private static final int			caution	= 1024;
 
-	private final Task<File>		task;
+	private final Task<? extends File>	task;
 
-	private final FileInputStream	wrappedStream;
+	private final FileInputStream		wrappedStream;
 
-	public CautiousFileInputStream(Task<File> task) throws FileNotFoundException {
+	public CautiousFileInputStream(Task<? extends File> task) throws FileNotFoundException {
 		this.task = task;
 		this.wrappedStream = new FileInputStream(task.getTaskInformation().getAdditionalInformation());
 	}

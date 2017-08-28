@@ -1,35 +1,20 @@
 package de.janhoelscher.jms.database.media;
 
-public class ImageFile implements MediaFile {
+public class ImageFile extends MediaFile {
 
-	private final int		id;
+	/**
+	 *
+	 */
+	private static final long	serialVersionUID	= 8976559162637091873L;
 
-	private final String	file;
+	private final int			width;
 
-	private long			size;
+	private final int			height;
 
-	private int				width;
-
-	private int				height;
-
-	public ImageFile(int id, String file, long size, int width, int height) {
-		this.id = id;
-		this.file = file;
-		this.size = size;
+	protected ImageFile(int id, int libraryId, String path, long size, int width, int height) {
+		super(id, libraryId, path, size);
 		this.width = width;
 		this.height = height;
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public String getFile() {
-		return file;
-	}
-
-	public long getSize() {
-		return size;
 	}
 
 	public int getWidth() {

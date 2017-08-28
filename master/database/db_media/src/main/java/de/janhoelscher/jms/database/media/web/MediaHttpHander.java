@@ -5,8 +5,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
+import de.janhoelscher.jms.database.media.AudioFile;
 import de.janhoelscher.jms.database.media.MediaDatabase;
 import de.janhoelscher.jms.database.media.VideoFile;
 import de.janhoelscher.jms.database.media.scan.ffmpeg.AudioStreamExtractor;
@@ -18,7 +20,7 @@ import de.janhoelscher.jms.web.server.HttpRequestHandler;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response;
 
-public class MediaHttpRequestHander implements HttpRequestHandler {
+public class MediaHttpHander implements HttpRequestHandler {
 
 	@Override
 	public Response handleHttpRequest(Request request) throws Exception {
@@ -50,12 +52,12 @@ public class MediaHttpRequestHander implements HttpRequestHandler {
 	}
 
 	private Response createVideoResponse(VideoFile file) throws IOException {
-		File rawFile = new File(file.getFile());
+		File rawFile = new File(file.getPath());
 		if (!rawFile.exists()) {
 			return NanoHTTPD.newFixedLengthResponse("404");
 		}
 		String videoPlayer;
-		if (file.getFile().endsWith("mkv")) {
+		if (FilenameUtils.getExtension(file.getPath()).endsWith("mkv")) {
 			videoPlayer =
 						IOUtils.toString(new InputStreamReader(getClass().getResourceAsStream("/de/janhoelscher/jms/media/www/videoplayer_separate_audio.html")));
 			videoPlayer = videoPlayer.replace("%audiosource%", "/media/" + file.getId() + "/extractedaudio");
@@ -70,14 +72,14 @@ public class MediaHttpRequestHander implements HttpRequestHandler {
 	}
 
 	private Response createRawVideoResponse(VideoFile file, Request request) throws IOException {
-		File rawFile = new File(file.getFile());
+		File rawFile = new File(file.getPath());
 		return MediaFileServer.serveMediaFile(request, "video/mp4", rawFile.length(), new FileInputStream(rawFile));
 	}
 
 	private Response createExtractedAudioResponse(VideoFile file, Request request) throws IOException {
-		String audio = file.getExtractedAudioFile();
+		AudioFile audio = file.getExtractedAudioFile();
 		if (audio == null) {
-			Task<File> task = AudioStreamExtractor.extractAudio(file.getFile());
+			Task<AudioFile> task = AudioStreamExtractor.extractAudio(file);
 			for (int tries = 1; tries < 4 && !task.getTaskInformation().getAdditionalInformation().exists(); tries++) {
 				Logger.info("Failed to get audio-file. Retrying in 1 second. (" + (3 - tries) + " tries left.");
 				//LogFactory.getLog(MediaHttpRequestHander.class).info("Failed to get audio-file. Retrying in 1 second. (" + (3 - tries) + " tries left.");
@@ -87,16 +89,16 @@ public class MediaHttpRequestHander implements HttpRequestHandler {
 					// ignored
 				}
 			}
-			File rawFile = task.getTaskInformation().getAdditionalInformation();
-			file.setExtractedAudioFile(rawFile.getAbsolutePath());
+			audio = task.getTaskInformation().getAdditionalInformation();
+			file.setExtractedAudioFile(audio);
 			if (task.isFinished()) {
-				return MediaFileServer.serveMediaFile(request, NanoHTTPD.getMimeTypeForFile(rawFile.getAbsolutePath()), rawFile.length(), new FileInputStream(rawFile));
+				return MediaFileServer.serveMediaFile(request, NanoHTTPD.getMimeTypeForFile(audio.getPath()), audio.getSize(), new FileInputStream(audio));
 			} else {
-				return MediaFileServer.serveMediaFile(request, NanoHTTPD.getMimeTypeForFile(rawFile.getAbsolutePath()), rawFile.length(), new CautiousFileInputStream(task));
+				return MediaFileServer.serveMediaFile(request, NanoHTTPD.getMimeTypeForFile(audio.getPath()), audio.getSize(), new CautiousFileInputStream(task));
 			}
 		} else {
-			File rawFile = new File(audio);
-			return MediaFileServer.serveMediaFile(request, NanoHTTPD.getMimeTypeForFile(audio), rawFile.length(), new FileInputStream(rawFile));
+			File rawFile = new File(audio.getPath());
+			return MediaFileServer.serveMediaFile(request, NanoHTTPD.getMimeTypeForFile(audio.getPath()), rawFile.length(), new FileInputStream(rawFile));
 		}
 	}
 

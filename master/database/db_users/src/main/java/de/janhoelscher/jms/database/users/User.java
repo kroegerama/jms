@@ -2,34 +2,49 @@ package de.janhoelscher.jms.database.users;
 
 public class User {
 
-	private final String	name;
+	private final int	id;
 
-	private Group			group;
+	private String		name;
 
-	protected User(String name) {
+	private Group		group;
+
+	protected User(int id, String name) {
+		this.id = id;
 		this.name = name;
+	}
+
+	public int getId() {
+
+		return id;
 	}
 
 	public String getName() {
 		return name;
 	}
 
+	public void setName(String name) {
+		if (!this.name.equals(name)) {
+			this.name = name;
+			UserDatabase.updateUserName(this);
+		}
+	}
+
 	public Group getGroup() {
 		if (group == null) {
-			return UserDatabase.getGroup(this);
+			group = UserDatabase.getGroup(this);
 		}
 		return group;
 	}
 
 	public void setGroup(Group group) {
-		this.group = group;
-		if (!this.group.getName().equals(group.getName())) {
+		if (getGroup() == null || getGroup().getId() != group.getId()) {
+			this.group = group;
 			UserDatabase.updateUserGroup(this);
 		}
 	}
 
 	public boolean hasPermission(String permission) {
-		return group.hasPermission(permission);
+		return getGroup() != null && getGroup().hasPermission(permission);
 	}
 
 	@Override
@@ -56,6 +71,6 @@ public class User {
 		} else if (!name.equals(other.name)) {
 			return false;
 		}
-		return getGroup().getName().equals(other.getGroup().getName());
+		return getGroup().getId() == other.getGroup().getId();
 	}
 }

@@ -5,15 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 
+import de.janhoelscher.jms.database.media.Library;
+import de.janhoelscher.jms.database.media.MediaDatabase;
 import de.janhoelscher.jms.database.media.VideoFile;
 
 public class VideoInfoExtractor {
 
-	public static VideoFile getVideoFileInformation(String path) throws IOException {
-		return VideoInfoExtractor.getVideoFileInformation(new File(path));
+	public static VideoFile getVideoFileInformation(Library lib, String path) throws IOException {
+		return VideoInfoExtractor.getVideoFileInformation(lib, new File(path));
 	}
 
-	public static VideoFile getVideoFileInformation(File file) throws IOException {
+	public static VideoFile getVideoFileInformation(Library lib, File file) throws IOException {
 		InputStream in = FFmpeg.runFFmpeg("-i \"" + file.getPath() + "\"");
 		Scanner scan = new Scanner(in);
 		long duration = -1;
@@ -32,7 +34,7 @@ public class VideoInfoExtractor {
 			}
 		}
 		scan.close();
-		return new VideoFile(-1, file.getAbsolutePath(), duration, file.length(), width, height, framerate, null);
+		return MediaDatabase.createVideoFile(lib, file.getAbsolutePath(), file.length(), duration, width, height, framerate);
 	}
 
 	private static long getDuration(String line) {

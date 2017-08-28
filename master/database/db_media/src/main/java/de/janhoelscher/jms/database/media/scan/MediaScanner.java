@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 
 import de.janhoelscher.jms.database.media.ImageFile;
 import de.janhoelscher.jms.database.media.Library;
+import de.janhoelscher.jms.database.media.MediaDatabase;
 import de.janhoelscher.jms.database.media.MediaFile;
 import de.janhoelscher.jms.database.media.scan.ffmpeg.AudioInfoExtractor;
 import de.janhoelscher.jms.database.media.scan.ffmpeg.VideoInfoExtractor;
@@ -39,7 +40,7 @@ public class MediaScanner {
 	}
 
 	public void scan() {
-		scanDir(new File(library.getRootDirectory()));
+		scanDir(new File(library.getRootDir()));
 	}
 
 	private void scanDir(File directory) {
@@ -53,15 +54,18 @@ public class MediaScanner {
 	}
 
 	private void scanSingleFile(File file) {
+		if (isInDatabase(file)) {
+			return;
+		}
 		MediaFile mFile = null;
 		try {
 			switch (library.getType()) {
 				case SERIES:
 				case MOVIES:
-					mFile = VideoInfoExtractor.getVideoFileInformation(file);
+					mFile = VideoInfoExtractor.getVideoFileInformation(library, file);
 					break;
 				case MUSIC:
-					mFile = AudioInfoExtractor.getAudioFileInformation(file);
+					mFile = AudioInfoExtractor.getAudioFileInformation(library, file);
 				case PICTURES:
 					mFile = getImageInformation(file);
 				default:
@@ -88,11 +92,14 @@ public class MediaScanner {
 	private ImageFile getImageInformation(File imageFile) {
 		try {
 			BufferedImage image = ImageIO.read(imageFile);
-			return new ImageFile(-1, imageFile.getAbsolutePath(), imageFile.length(), image.getWidth(), image.getHeight());
+			return MediaDatabase.createImageFile(library, imageFile.getAbsolutePath(), imageFile.length(), image.getWidth(), image.getHeight());
 		} catch (IOException e) {
 			Logger.warn("Failed to load ImageFile \"" + imageFile + "\"", e);
-			//LogFactory.getLog(MediaDatabase.class).warn("Failed to load ImageFile \"" + imageFile + "\"", e);
 			return null;
 		}
+	}
+
+	private boolean isInDatabase(File file) {
+		return MediaDatabase.getFileId(file.getAbsolutePath()) >= 0;
 	}
 }

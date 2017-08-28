@@ -1,39 +1,24 @@
 package de.janhoelscher.jms.database.media;
 
-public class AudioFile implements MediaFile {
+public class AudioFile extends MediaFile {
 
-	private final int		id;
+	/**
+	 *
+	 */
+	private static final long	serialVersionUID	= 1380173474323895045L;
 
-	private final String	file;
+	private final long			duration;
 
-	private long			duration;
+	private final int			bitrate;
 
-	private long			size;
-
-	private int				bitrate;
-
-	public AudioFile(int id, String file, long duration, long size, int bitrate) {
-		this.id = id;
-		this.file = file;
+	protected AudioFile(int id, int libraryId, String path, long size, long duration, int bitrate) {
+		super(id, libraryId, path, size);
 		this.duration = duration;
-		this.size = size;
 		this.bitrate = bitrate;
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public String getFile() {
-		return file;
 	}
 
 	public long getDuration() {
 		return duration;
-	}
-
-	public long getSize() {
-		return size;
 	}
 
 	public int getBitrate() {

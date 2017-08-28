@@ -4,34 +4,48 @@ import de.janhoelscher.jms.database.users.permissions.PermissionSet;
 
 public class Group {
 
-	private final String	name;
+	private final int		id;
+
+	private String			name;
 
 	private PermissionSet	permissions;
 
-	protected Group(String name) {
+	protected Group(int id, String name) {
+		this.id = id;
 		this.name = name;
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	public String getName() {
 		return name;
 	}
 
+	public void setName(String name) {
+		if (!this.name.equals(name)) {
+			this.name = name;
+			UserDatabase.updateGroupName(this);
+		}
+	}
+
 	public PermissionSet getPermissions() {
 		if (permissions == null) {
-			return UserDatabase.getPermissions(this);
+			permissions = UserDatabase.getPermissions(this);
 		}
 		return permissions;
 	}
 
 	public void setPermissions(PermissionSet permissions) {
-		this.permissions = permissions;
-		if (this.permissions.equals(permissions)) {
+		if (getPermissions().equals(permissions)) {
 			return;
 		}
+		this.permissions = permissions;
 		UserDatabase.updatePermissions(this);
 	}
 
 	public boolean hasPermission(String permission) {
-		return permissions.contains(permission);
+		return getPermissions() != null && getPermissions().contains(permission);
 	}
 }

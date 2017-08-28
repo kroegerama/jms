@@ -3,8 +3,6 @@ package de.janhoelscher.jms.database.users.web.login;
 import java.io.InputStream;
 import java.util.Scanner;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import de.janhoelscher.jms.database.users.User;
 import de.janhoelscher.jms.database.users.UserDatabase;
 import de.janhoelscher.jms.web.http.Request;
@@ -66,13 +64,13 @@ public class LoginHttpHandler implements HttpRequestHandler {
 				}
 			}
 			User user = UserDatabase.getUser(username);
-			return UserDatabase.passwordMatches(user, LoginHttpHandler.calculateHash(password));
+			if (UserDatabase.passwordMatches(user, password)) {
+				UserLoginProvider.setUser(request, user);
+				return true;
+			}
+			return false;
 		} catch (Exception e) {
 			return false;
 		}
-	}
-
-	private static String calculateHash(String data) {
-		return DigestUtils.sha256Hex(data);
 	}
 }

@@ -1,16 +1,15 @@
 /* WORK IN PROGRESS */
 
 CREATE TABLE IF NOT EXISTS users (
-	name VARCHAR(256) PRIMARY KEY,
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name VARCHAR(256) UNIQUE NOT NULL,
 	password CHARACTER(256) NOT NULL,
-	groupname VARCHAR(256),
-	FOREIGN KEY(groupname) REFERENCES groups(name)
+	groupid INTEGER,
+	FOREIGN KEY(groupid) REFERENCES groups(id)
 );
 
 CREATE TABLE IF NOT EXISTS groups (
-	name VARCHAR(256) PRIMARY KEY,
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name VARCHAR(256) UNIQUE NOT NULL,
 	permissions VARCHAR(2048)
 );
-
-/* Add user name=admin password=admin */
-INSERT INTO users(name,password) VALUES("admin","8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918");

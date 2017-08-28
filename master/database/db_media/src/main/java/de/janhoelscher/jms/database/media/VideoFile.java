@@ -1,48 +1,32 @@
 package de.janhoelscher.jms.database.media;
 
-public class VideoFile implements MediaFile {
+public class VideoFile extends MediaFile {
 
-	private int		id;
+	/**
+	 *
+	 */
+	private static final long	serialVersionUID	= -7546213430711522073L;
 
-	private String	file;
+	private final long			duration;
 
-	private long	duration;
+	private final int			width;
 
-	private long	size;
+	private final int			height;
 
-	private int		width;
+	private final float			framerate;
 
-	private int		height;
+	private AudioFile			extractedAudioFile;
 
-	private float	framerate;
-
-	private String	extractedAudioFile;
-
-	public VideoFile(int id, String file, long duration, long size, int width, int height, float framerate, String extractedAudioFile) {
-		this.id = id;
-		this.file = file;
+	public VideoFile(int id, int libraryId, String path, long size, long duration, int width, int height, float framerate) {
+		super(id, libraryId, path, size);
 		this.duration = duration;
-		this.size = size;
 		this.width = width;
 		this.height = height;
 		this.framerate = framerate;
-		this.extractedAudioFile = extractedAudioFile;
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public String getFile() {
-		return file;
 	}
 
 	public long getDuration() {
 		return duration;
-	}
-
-	public long getSize() {
-		return size;
 	}
 
 	public int getWidth() {
@@ -57,19 +41,15 @@ public class VideoFile implements MediaFile {
 		return framerate;
 	}
 
-	public String getExtractedAudioFile() {
+	public AudioFile getExtractedAudioFile() {
+		if (extractedAudioFile == null) {
+			return MediaDatabase.getExtractedAudioFile(this);
+		}
 		return extractedAudioFile;
 	}
 
-	public void setExtractedAudioFile(String extractedAudioPath) {
-		if (this.extractedAudioFile == null || !this.extractedAudioFile.equals(extractedAudioPath)) {
-			this.extractedAudioFile = extractedAudioPath;
-			MediaDatabase.updateExtractedAudioFile(this);
-		}
-	}
-
-	@Override
-	public String toString() {
-		return "VideoFile [file=" + file + ", duration=" + duration + ", size=" + size + ", width=" + width + ", height=" + height + ", framerate=" + framerate + "]";
+	public void setExtractedAudioFile(AudioFile audioFile) {
+		this.extractedAudioFile = audioFile;
+		MediaDatabase.updateExtractedAudioFile(this);
 	}
 }
