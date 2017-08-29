@@ -17,5 +17,6 @@
 		<module>db_core</module>
 		<module>db_media</module>
 		<module>db_users</module>
+		<module>tmdb</module>
 	</modules>
 </project>

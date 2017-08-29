@@ -7,13 +7,17 @@
 		<link rel="stylesheet" href="/resources/css">
 	</head>
 	<body>
+		<nav>
+			<a href="/" class="head"><div class="brand">JavaMediaServer</div></a>
+			<a href="#" class="item right"><div>Logout</div></a>
+		</nav>
 		<div class="center">
-			<h1>JMS Login</h1>
+			<h1>Change Username</h1>
 			<hr/>
 			<form method="post">
-				<input type="text" readonly name="type" value="changename" style="display: none;"/>
-				<input class="input" type="text" placeholder="New Username" name="username"/>
-				<input class="submit" type="submit"/>
+				<input type="text" name="type" value="changename" style="display: none;" readonly />
+				<input type="text" name="newname" class="input" placeholder="%currentname%"/>
+				<input class="btn" type="submit"/>
 			</form>
 		</div>
 	</body>

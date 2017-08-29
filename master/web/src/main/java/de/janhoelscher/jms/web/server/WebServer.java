@@ -80,7 +80,7 @@ public class WebServer extends NanoHTTPD {
 				response = null;
 			}
 		} catch (Exception e) {
-			Logger.warn("Failed to handle request for session " + session);
+			Logger.warn("Failed to handle request for session " + session, e);
 			response = NanoHTTPD.newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "500 - Internal Server Error"); // TODO build a better 500 site.
 		}
 		if (response == null) {

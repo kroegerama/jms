@@ -1,7 +1,6 @@
 package de.janhoelscher.jms.database.users.web.login;
 
 import java.io.InputStream;
-import java.util.Scanner;
 
 import de.janhoelscher.jms.database.users.User;
 import de.janhoelscher.jms.database.users.UserDatabase;
@@ -44,25 +43,13 @@ public class LoginHttpHandler implements HttpRequestHandler {
 		return getClass().getResourceAsStream("/de/janhoelscher/jms/www/login/login.js");
 	}
 
-	@SuppressWarnings("resource")
 	protected static boolean checkLogin(Request request) {
 		if (request.getMethod() != Method.POST) {
 			return false;
 		}
 		try {
-			Scanner scan = new Scanner(request.getInputStream());
-			String username = null;
-			String password = null;
-			if (scan.hasNextLine()) {
-				String line[] = scan.nextLine().split("\\&");
-				for (String s : line) {
-					if (s.startsWith("username=")) {
-						username = s.substring("username=".length());
-					} else if (s.startsWith("password=")) {
-						password = s.substring("password=".length());
-					}
-				}
-			}
+			String username = request.getPostData().get("username");
+			String password = request.getPostData().get("password");
 			User user = UserDatabase.getUser(username);
 			if (UserDatabase.passwordMatches(user, password)) {
 				UserLoginProvider.setUser(request, user);

@@ -2,6 +2,40 @@ package de.janhoelscher.jms.logging;
 
 public abstract class Logger {
 
+	public static final int	DEBUG		= 0b0001;
+
+	public static final int	INFO		= 0b0010;
+
+	public static final int	WARN		= 0b0100;
+
+	public static final int	ERROR		= 0b1000;
+
+	private static int		LOG_LEVEL	= DEBUG | INFO | WARN | ERROR;
+
+	public static void init(int logLevel) {
+		LOG_LEVEL = logLevel;
+	}
+
+	public static void setDebug(boolean enabled) {
+		set(DEBUG, enabled);
+	}
+
+	public static void setInfo(boolean enabled) {
+		set(INFO, enabled);
+	}
+
+	public static void setWarn(boolean enabled) {
+		set(WARN, enabled);
+	}
+
+	public static void setError(boolean enabled) {
+		set(ERROR, enabled);
+	}
+
+	public static void set(int level, boolean enabled) {
+		LOG_LEVEL = enabled ? (LOG_LEVEL | level) : (LOG_LEVEL & ~level);
+	}
+
 	public static void debug(String msg) {
 		debug(msg, null);
 	}

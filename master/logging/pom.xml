@@ -5,8 +5,21 @@
     <artifactId>master</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <groupId>de.janhoelscher.jms</groupId>
   <artifactId>logging</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <name>logging</name>
+  <build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<verbose>true</verbose>
+					<fork>true</fork>
+					<debug>false</debug>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

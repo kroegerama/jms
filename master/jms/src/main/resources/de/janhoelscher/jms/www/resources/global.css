@@ -1,0 +1,122 @@
+body {
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	background: #262626;
+	overflow: hidden;
+	color: rgba(0, 255, 255, 0.5);
+}
+
+body h1, h2, h3, h4, h5 {
+	color: rgba(0, 255, 255, 0.5);
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
+nav {
+	z-index: 999;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 64px;
+	background: rgba(255, 255, 255, 0.1);
+	font-size: 17;
+}
+
+nav .item div,
+nav .head .brand {
+	position: relative;
+	top: 50%;
+	transform: translate(0%, -50%);
+}
+
+nav .item,
+nav .head {
+	float: left;
+	padding-left: 2.5%;
+	padding-right: 2.5%;
+	height: 100%;
+	text-align: center;
+	margin: auto;
+}
+
+nav .item:hover,
+nav .head:hover {
+	background: #262626;
+}
+
+nav .item.right {
+	float: right;
+}
+
+nav .head .brand {
+	height: 50%;
+	font-size: 28;
+}
+
+.center {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	text-align: center;
+}
+
+.hcenter {
+	left: 50%;
+	transform: translate(-50%, 0%);
+}
+
+.vcenter {
+	top: 50%;
+	transform: translate(0%, -50%);
+}
+
+hr {
+	border: 0px;
+	border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.input {
+	transition: background 0.2s, border 0.2s;
+	width: 100%;
+	padding: 12px 20px;
+	margin: 8px 0;
+	border: none;
+	border-bottom: 2px solid rgba(0, 255, 255, 0.5);
+	border-radius: 0px;
+	outline: none;
+	color: #FFF;
+	background: rgba(255, 255, 255, 0.1);
+	text-align: center;
+}
+
+.input:focus {
+	background: rgba(255, 255, 255, 0.2);
+	border-bottom: 2px solid rgba(0, 255, 255, 0.8);
+}
+
+.btn {
+	transition: background 0.2s, border 0.2s;
+	width: 100%;
+	padding: 12px 20px;
+	margin-top: 15px;
+	border: none;
+	border: 2px solid rgba(0, 255, 255, 0.5);
+	border-radius: 0px;
+	outline: none;
+	color: #FFF;
+	background: rgba(255, 255, 255, 0.1);
+	text-align: center;
+}
+
+.btn:hover {
+	border: 2px solid rgba(0, 255, 255, 0.7);
+	background: rgba(255, 255, 255, 0.2);
+}

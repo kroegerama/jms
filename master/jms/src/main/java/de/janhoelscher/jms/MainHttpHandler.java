@@ -38,10 +38,10 @@ public class MainHttpHandler implements HttpRequestHandler {
 	}
 
 	private InputStream getCssInputStream() {
-		return getClass().getResourceAsStream("/de/janhoelscher/jms/www/webresource/global.css");
+		return getClass().getResourceAsStream("/de/janhoelscher/jms/www/resources/global.css");
 	}
 
 	private InputStream getJsInputStream() {
-		return getClass().getResourceAsStream("/de/janhoelscher/jms/www/webresource/global.js");
+		return getClass().getResourceAsStream("/de/janhoelscher/jms/www/resources/global.js");
 	}
 }
